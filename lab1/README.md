@@ -1,0 +1,222 @@
+# Лабораторная работа №1 Project Euler #4 и #27
+
+## Юдин Георгий Дмитриевич
+
+## Описание проблемы
+[Project Euler - Problem 4](https://projecteuler.net/problem=4): Найти наибольший палиндром, образованный произведением двух трехзначных чисел.
+
+[Project Euler - Problem 27](https://projecteuler.net/problem=27): Дана квадратичная форма: $n^2 + an + b$, где $|a| < 1000$ и $|b| <= 10000$.
+Необходимо найти произведение коэффициентов $a$ и $b$, при которых эта квадратичная форма производит наибольшое количество простых чисел для каждого подряд идущего значения n, начиная с 0.
+
+Обе задачи реализованы несколькими стилями: обычная/хвостовая рекурсия, модульный стиль `map/filter/fold`, императивные циклы и ленивые последовательности.
+<hr>
+
+
+## Ключевые элементы реализации
+
+### Euler #4 - наибольший палиндром
+
+Проверка числа (в виде строки) на палиндром
+
+```ocaml
+let first_sign s = s.[0]
+let last_sign s = s.[String.length s - 1] 
+let get_middle s = String.sub s 1 (String.length s - 2) 
+
+let rec is_palindrom s = if String.length s == 1 then true else
+    match s with
+    | "" -> true
+    | _ -> (first_sign s == last_sign s) && is_palindrom (get_middle s)
+```
+
+Варианты решения:
+
+1) обычная рекурсия
+
+```ocaml
+let rec f2 x y = match x with
+    | 99 -> 0
+    | _ -> let z = x * y in if is_palindrom(string_of_int z) then max z (f2 (x-1) y) else f2 (x-1) y
+
+let rec f1 x = match x with
+    | 99 -> 0
+    | _ -> let y = f2 999 x in if is_palindrom(string_of_int y) then max y (f1 (x-1) ) else f1 (x-1)
+
+let _ = print_endline (string_of_int (f1 999))
+```
+
+2) хвостовая рекурсия
+
+```ocaml
+let rec f2_tr x y acc = match x with
+    | 99 -> acc
+    | _ -> let z = x * y in if is_palindrom(string_of_int z) then f2_tr (x - 1) y (max z acc) else f2_tr (x-1) y acc
+
+let rec f1_tr x acc = match x with
+    | 99 -> acc
+    | _ -> let y = f2_tr 999 x 0 in if is_palindrom(string_of_int y) then f1_tr (x-1) (max y acc) else f1_tr (x-1) acc
+
+let _ = print_endline (string_of_int (f1_tr 999 0))
+```
+
+3) в модульном стиле
+
+```ocaml
+let rec ( -- ) (i1, j1) (i2, j2) = 
+  if i1 > i2 || j1 > j2 then []
+  else if j1 == j2 then (i1, j1) :: (i1 + 1, 100) -- (i2, j2)
+  else (i1, j1) :: (i1, j1 + 1) -- (i2, j2)
+let get_multiple (x, y) = string_of_int (x * y)
+let max_element compare lst = 
+  match lst with 
+  | [] -> 0
+  | h :: t -> List.fold_left compare h t
+
+let result =
+  (100, 100) -- (999, 999)
+  |> List.map get_multiple
+  |> List.filter is_palindrom
+  |> List.map int_of_string
+  |> max_element max
+let _ = print_endline (string_of_int result)
+```
+
+4) с императивными циклами
+
+```ocaml
+let find_answer_with_circles =
+  let acc = ref 0 in
+  for a = 100 to 999 do 
+    for b = 100 to 999 do 
+      if is_palindrom (string_of_int (a * b)) then acc := max !acc (a * b)
+    done
+  done;
+  !acc
+let _ = print_endline (string_of_int find_answer_with_circles)
+```
+
+5) с ленивыми последовательностями
+```ocaml
+type 'a lazysequence = Cons of 'a * 'a lazysequence Lazy.t
+let rec map_lazy f (Cons (h, t)) = Cons(f h, lazy(map_lazy f (Lazy.force t)))
+
+let rec palindrom = Cons((100, 100), lazy (map_lazy (fun (x, y) -> if y == 999 then (x+1, 100) else (x, y+1)) palindrom))
+
+let rec find_answer_lazy (Cons((x, y), t)) = if x == 999 then 0 else (if is_palindrom (string_of_int (x * y)) then max (x * y) (find_answer_lazy (Lazy.force t)) else (find_answer_lazy (Lazy.force t)))
+
+let _ = print_endline (string_of_int (find_answer_lazy palindrom))
+```
+
+### Euler #27 - квадратичная форма
+
+Проерка числа на простоту
+
+```ocaml
+let is_prime n = 
+  if n < 2 then false
+  else 
+    let rec check p = 
+      if p * p > n then true
+      else if n mod p == 0 then false
+      else check (p+1)
+    in check 2
+```
+
+Вычисление квадратичной формы и нахождение максимального n, которое может дать квадратичная форма с данными коэффициентами
+
+```ocaml
+let f n a b = n * n + a * n + b
+
+let rec sort_through_n n a b= 
+  if is_prime (f n a b) then sort_through_n (n + 1) a b else (n - 1)
+```
+
+Варианты решения:
+
+1) обычная рекурсия
+
+```ocaml
+let find_answer_with_recursion a_max b_max = 
+  let rec sort_through_a a = 
+    match a with
+    | _ when a = -a_max - 1 -> (0, 0)
+    | _ -> let rec sort_through_b b = 
+      match b with 
+      | _ when b = -b_max - 1 -> (0, 0)
+      | _ -> max (sort_through_n 0 a b, a * b) (sort_through_b (b - 1))
+      in max (sort_through_b b_max) (sort_through_a (a - 1)) in
+  sort_through_a a_max
+```
+
+2) хвостовая рекурсия
+
+```ocaml
+let find_answer_with_tail_recursion a_max b_max = 
+  let rec sort_through_a a acc = 
+    match a with
+    | _ when a = -a_max - 1 -> acc
+    | _ -> let rec sort_through_b b acc = 
+      match b with 
+      | _ when b = -b_max - 1 -> acc
+      | _ -> sort_through_b (b - 1) (max (sort_through_n 0 a b, a * b) acc)
+      in sort_through_a (a - 1) (max (sort_through_b b_max (0, 0)) acc) in
+  sort_through_a a_max (0, 0)
+```
+
+3) модульная реализация
+
+```ocaml
+let rec ( -- ) (i1, j1) (i2, j2) = 
+  if i1 > i2 || j1 > j2 then [] 
+  else if j1 == j2 then (i1, j1) :: (i1 + 1, -1000) -- (i2, j2)
+  else (i1, j1) :: (i1, j1 + 1) -- (i2, j2)
+let get_info (a, b) = ((sort_through_n 0 a b), a * b)
+let max_element compare lst = 
+  match lst with 
+  | [] -> (0, 0)
+  | h :: t -> List.fold_left compare h t 
+
+let result = 
+  (-1000, -1000) -- (1000, 1000)
+  |> List.map get_info
+  |> max_element max
+```
+
+4) с императивными циклами
+
+```ocaml
+let find_answer_with_circles =
+  let r = ref (0, 0) in
+  for a = -1000 to 1000 do
+    for b = -1000 to 1000 do
+      let n = ref 0 in
+      while is_prime (f !n a b) do
+        n := !n + 1 
+      done;
+      if fst !r < !n then r := (!n - 1, a * b)
+    done
+  done;
+  fst !r
+```
+
+5) с ленивыми последовательностями
+
+```ocaml
+type 'a lazysequence = Cons of 'a * 'a lazysequence Lazy.t
+let rec map f (Cons(h, t)) = Cons(f h, lazy(map f (Lazy.force t)))
+let rec sort_through = Cons((-1000, -1000), 
+  lazy(map (fun (x, y) -> if y == 1000 then (x + 1, -1000) else (x, y + 1)) sort_through))
+
+let rec find_answer_with_sequence (Cons((a, b), t)) = 
+  if a == 1001 then (0, 0) else max ((sort_through_n 0 a b), a * b) (find_answer_with_sequence (Lazy.force t))
+```
+
+# Выводы
+
+- Хвостовая рекурсия ведёт себя как обычный цикл: работает быстро и не ест лишнюю память. Обычная рекурсия короче на вид, но на длинных входах может упереться в стек.
+
+- Там, где нужно много раз подряд пройти по данным, обычные массивы и for-циклы получаются проще и часто быстрее.
+
+- sequences удобны, когда данные можно «делать по ходу» и не хранить лишние промежуточные списки — код получается аккуратнее.
+
+Итог: Я посмотрел на базовые приёмы и абстракции языка OCaml. Реализовал простые алгоритмы и струтуры данных и применил их на задачах проекта Эйлера.
