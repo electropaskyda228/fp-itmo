@@ -107,6 +107,21 @@ let rec find_answer_lazy (Cons((x, y), t)) = if x == 999 then 0 else (if is_pali
 let _ = print_endline (string_of_int (find_answer_lazy palindrom))
 ```
 
+6) реализация на python
+
+```python
+def is_palindrome(n):
+    s = str(n)
+    return s == s[::-1]
+    
+maximum = 0
+for a in range (100, 1000):
+    for b in range(100, 1000):
+        if is_palindrome(a * b):
+            maximum = max(a * b, maximum)
+print(maximum)
+```
+
 ### Euler #27 - квадратичная форма
 
 Проерка числа на простоту
@@ -209,6 +224,36 @@ let rec sort_through = Cons((-1000, -1000),
 
 let rec find_answer_with_sequence (Cons((a, b), t)) = 
   if a == 1001 then (0, 0) else max ((sort_through_n 0 a b), a * b) (find_answer_with_sequence (Lazy.force t))
+```
+
+6) реализация на python
+
+```python
+def f(n, a, b):
+    return n * n + a * n + b
+    
+def is_prime(n):
+    if n <= 1:
+        return False
+    i = 2
+    while i * i <= n:
+        if n % i == 0:
+            return False
+        i += 1
+    return True
+    
+result = 0
+n_max = 0
+for a in range(-1000, 1001):
+    for b in range(-1000, 1001):
+        n = 0
+        while is_prime(f(n, a, b)):
+            n += 1
+        if n_max < (n - 1):
+            n_max = n - 1
+            result = a * b
+print(result)
+print(n_max)   
 ```
 
 # Выводы
