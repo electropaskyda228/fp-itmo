@@ -333,7 +333,7 @@ let result =
   |> max_element max
 ```
 
-4) с императивными циклами
+5) с императивными циклами
 
 ```ocaml
 let find_answer_with_circles =
@@ -350,7 +350,7 @@ let find_answer_with_circles =
   fst !r
 ```
 
-5) с ленивыми последовательностями
+6) с ленивыми последовательностями
 
 ```ocaml
 type 'a lazysequence = Cons of 'a * 'a lazysequence Lazy.t
@@ -362,7 +362,7 @@ let rec find_answer_with_sequence (Cons((a, b), t)) =
   if a == 1001 then (0, 0) else max ((sort_through_n 0 a b), a * b) (find_answer_with_sequence (Lazy.force t))
 ```
 
-6) реализация на python
+7) реализация на python
 
 ```python
 def f(n, a, b):
