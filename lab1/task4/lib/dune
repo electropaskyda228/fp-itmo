@@ -1,0 +1,4 @@
+(library
+ (name mylib)
+ (libraries)
+ (modules :standard))
