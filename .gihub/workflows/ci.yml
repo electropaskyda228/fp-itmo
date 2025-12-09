@@ -7,8 +7,6 @@ jobs:
     strategy:
       matrix:
         project:
-          - name: "Lab 1"
-            path: "./lab1"
           - name: "AVL Bag"
             path: "./second_lab/avl-bag"
     
