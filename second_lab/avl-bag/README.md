@@ -155,7 +155,7 @@ let rec delete x tree =
 5) Функция map
 
 ```ocaml
-(*map)
+(* map *)
 let map f tree =
   let rec aux acc = function
     | Leaf -> acc
