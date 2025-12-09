@@ -141,38 +141,21 @@ module AvlMultiset: AVL_BAG = struct
 
   (* map *)
   let map f tree =
-    let rec collect = function
-      | Leaf -> []
-      | Node(_, v, count, l, r) -> 
-          let left_items = collect l in
-          let current_items = List.init count (fun _ -> f v) in
-          let right_items = collect r in
-          left_items @ current_items @ right_items
-    in
-    
-    let elements = collect tree in
-    
-    let rec group sorted_list =
-      match sorted_list with
-      | [] -> []
-      | x :: xs ->
-          let rec count_same cnt = function
-            | y :: ys when y = x -> count_same (cnt + 1) ys
-            | rest -> (x, cnt), rest
+    let map f tree =
+    let rec aux acc = function
+      | Leaf -> acc
+      | Node(_, v, count, l, r) ->
+          let acc' = aux acc l in
+          let acc'' = 
+            let rec insert_many t x n =
+              if n = 0 then t
+              else insert_many (insert (f x) t) x (n - 1)
+            in
+            insert_many acc' v count
           in
-          let (elem, cnt), rest = count_same 1 xs in
-          (elem, cnt) :: group rest
+          aux acc'' r
     in
-    
-    let grouped = group (List.sort compare elements) in
-    
-    List.fold_left (fun acc (x, cnt) ->
-      let rec insert_many t x cnt =
-        if cnt = 0 then t
-        else insert_many (insert x t) x (cnt - 1)
-      in
-      insert_many acc x cnt
-    ) Leaf grouped
+    aux Leaf tree
 
   (* filter *)
   let rec merge_avl t1 t2 = 
