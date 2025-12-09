@@ -1,8 +1,0 @@
-(lang dune 3.8)
-
-(name first_lab)
-
-(package
- (name first_lab)
- (allow_empty)
- (depends alcotest))
