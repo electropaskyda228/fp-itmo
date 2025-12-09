@@ -1,0 +1,5 @@
+(library
+ (name avl_bag)
+ (public_name avl_bag)
+ (libraries)
+ (modules :standard))

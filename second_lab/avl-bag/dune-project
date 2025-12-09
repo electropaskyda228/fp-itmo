@@ -1,0 +1,8 @@
+(lang dune 3.8)
+
+(name avl_bag)
+
+(package
+ (name avl_bag)
+ (allow_empty)
+ (depends alcotest))
