@@ -141,7 +141,6 @@ module AvlMultiset: AVL_BAG = struct
 
   (* map *)
   let map f tree =
-    let map f tree =
     let rec aux acc = function
       | Leaf -> acc
       | Node(_, v, count, l, r) ->
