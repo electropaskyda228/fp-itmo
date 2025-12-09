@@ -1,32 +1,34 @@
-name: CI - Matrix Testing
+name: Test AVL Bag
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'second_lab/avl-bag/**'
+  workflow_dispatch:
 
 jobs:
   test:
-    strategy:
-      matrix:
-        project:
-          - name: "AVL Bag"
-            path: "./second_lab/avl-bag"
-    
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     steps:
     - uses: actions/checkout@v3
     
-    - name: Setup OCaml for ${{ matrix.project.name }}
+    - name: Setup OCaml
       uses: ocaml/setup-ocaml@v2
       with:
         ocaml-compiler: "4.14.0"
+        disable-sandboxing: true 
     
     - name: Install dependencies
-      run: opam install dune alcotest -y
+      run: |
+        opam update
+        opam install dune alcotest -y
     
-    - name: Build ${{ matrix.project.name }}
-      working-directory: ${{ matrix.project.path }}
+    - name: Build AVL Bag
+      working-directory: ./second_lab/avl-bag
       run: dune build
     
-    - name: Test ${{ matrix.project.name }}
-      working-directory: ${{ matrix.project.path }}
+    - name: Test
+      working-directory: ./second_lab/avl-bag
       run: dune runtest
