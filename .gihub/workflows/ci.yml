@@ -1,4 +1,4 @@
-name: CI
+name: CI - Matrix Testing
 
 on: [push, pull_request]
 
@@ -6,23 +6,29 @@ jobs:
   test:
     strategy:
       matrix:
-        project: ["avl-bag", "first_lab"]
+        project:
+          - name: "Lab 1"
+            path: "./lab1"
+          - name: "AVL Bag"
+            path: "./second_lab/avl-bag"
     
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v3
-    - uses: ocaml/setup-ocaml@v2
+    
+    - name: Setup OCaml for ${{ matrix.project.name }}
+      uses: ocaml/setup-ocaml@v2
+      with:
+        ocaml-compiler: "4.14.0"
     
     - name: Install dependencies
       run: opam install dune alcotest -y
     
-    - name: Build ${{ matrix.project }}
-      run: |
-        cd ${{ matrix.project }}
-        dune build
+    - name: Build ${{ matrix.project.name }}
+      working-directory: ${{ matrix.project.path }}
+      run: dune build
     
-    - name: Test ${{ matrix.project }}
-      run: |
-        cd ${{ matrix.project }}
-        dune runtest
+    - name: Test ${{ matrix.project.name }}
+      working-directory: ${{ matrix.project.path }}
+      run: dune runtest
