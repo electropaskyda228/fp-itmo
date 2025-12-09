@@ -14,21 +14,48 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Setup OCaml
+    - name: Setup OCaml (без darcs)
       uses: ocaml/setup-ocaml@v2
       with:
         ocaml-compiler: "4.14.0"
-        disable-sandboxing: true 
+        disable-sandboxing: true
+        opam-repositories: |
+          default: https://opam.ocaml.org
+        dune-cache: false
     
-    - name: Install dependencies
+    - name: Install system dependencies вручную
       run: |
+        sudo apt-get update
+        # Устанавливаем только необходимые пакеты, пропускаем darcs
+        sudo apt-get install -y bubblewrap g++-multilib gcc-multilib musl-tools rsync pkg-config m4
+    
+    - name: Initialize OPAM
+      run: |
+        opam init --disable-sandboxing -y --bare
+        eval $(opam env)
+        opam switch create 4.14.0
+        eval $(opam env)
+    
+    - name: Install project dependencies
+      run: |
+        eval $(opam env)
         opam update
         opam install dune alcotest -y
     
     - name: Build AVL Bag
       working-directory: ./second_lab/avl-bag
-      run: dune build
+      run: |
+        eval $(opam env)
+        dune build
     
     - name: Test
       working-directory: ./second_lab/avl-bag
-      run: dune runtest
+      run: |
+        eval $(opam env)
+        dune runtest
+    
+    - name: Run specific tests
+      working-directory: ./second_lab/avl-bag
+      run: |
+        eval $(opam env)
+        dune exec test/test_avl.exe
