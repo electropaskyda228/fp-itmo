@@ -1,0 +1,30 @@
+# Dune
+_build/
+.merlin
+
+# OPAM
+.opam/
+*.opam.locked
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+*.swp
+*~
+
+# Coverage
+_bisect*.out
+_coverage/
+
+# OCaml
+*.cmi
+*.cmo
+*.cmx
+*.cmt
+*.cmti
+*.o
+*.a
+*.so
+*.exe
