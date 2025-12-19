@@ -40,7 +40,12 @@ jobs:
       run: |
         eval $(opam env)
         opam update
-        opam install dune alcotest -y
+        opam install dune alcotest qcheck qcheck-alcotest -y
+    
+    - name: Check installed packages
+      run: |
+        eval $(opam env)
+        opam list
     
     - name: Build AVL Bag
       working-directory: ./second_lab/avl-bag
@@ -52,10 +57,8 @@ jobs:
       working-directory: ./second_lab/avl-bag
       run: |
         eval $(opam env)
-        # Убираем лимит стека
         ulimit -s unlimited
-        # OCAMLRUNPARAM=l=0 означает неограниченный стек
-        OCAMLRUNPARAM="l=0" dune runtest
+        OCAMLRUNPARAM="l=0" dune runtest --force
 
   test-lab1-task4:
     name: Test Lab1 Task4
