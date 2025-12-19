@@ -104,7 +104,7 @@ jobs:
         # s=0 - неограниченный стек для обработчиков сигналов
         OCAMLRUNPARAM="l=0,s=0" dune runtest
 
-  test-lab2-task27:
+  test-lab1-task27:
     name: Test Lab2 Task27
     runs-on: ubuntu-22.04
     needs: test-lab1-task4
@@ -137,13 +137,13 @@ jobs:
         opam install dune alcotest -y
     
     - name: Build Lab2 Task27
-      working-directory: ./lab2/task27
+      working-directory: ./lab1/task27
       run: |
         eval $(opam env)
         dune build
     
     - name: Test Lab2 Task27
-      working-directory: ./lab2/task27
+      working-directory: ./lab1/task27
       run: |
         eval $(opam env)
         ulimit -s unlimited
