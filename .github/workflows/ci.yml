@@ -7,6 +7,7 @@ on:
       - 'second_lab/avl-bag/**'
       - 'lab1/task4/**'
       - 'lab2/task27/**'
+      - 'search-services/**'
   workflow_dispatch:
 
 jobs:
