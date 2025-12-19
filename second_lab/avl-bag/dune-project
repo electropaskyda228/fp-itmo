@@ -5,4 +5,4 @@
 (package
  (name avl_bag)
  (allow_empty)
- (depends alcotest))
+ (depends alcotest qcheckqcheck-alcotest))
