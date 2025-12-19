@@ -21,22 +21,40 @@ jobs:
       uses: ocaml/setup-ocaml@v2
       with:
         ocaml-compiler: "4.14.0"
+        disable-sandboxing: true
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bubblewrap pkg-config m4
+    
+    - name: Initialize OPAM
+      run: |
+        opam init --disable-sandboxing -y --bare
+        eval $(opam env)
+        opam switch create 4.14.0
+        eval $(opam env)
     
     - name: Install project dependencies
       run: |
+        eval $(opam env)
+        opam update
         opam install dune alcotest -y
     
     - name: Build AVL Bag
       working-directory: ./second_lab/avl-bag
-      run: dune build
+      run: |
+        eval $(opam env)
+        dune build
     
-    - name: Test AVL Bag with unlimited stack
+    - name: Test AVL Bag
       working-directory: ./second_lab/avl-bag
       run: |
-        # Полностью убираем ограничения стека
+        eval $(opam env)
+        # Убираем лимит стека
         ulimit -s unlimited
-        export OCAMLRUNPARAM="l=0"
-        dune runtest
+        # OCAMLRUNPARAM=l=0 означает неограниченный стек
+        OCAMLRUNPARAM="l=0" dune runtest
 
   test-lab1-task4:
     name: Test Lab1 Task4
@@ -50,22 +68,41 @@ jobs:
       uses: ocaml/setup-ocaml@v2
       with:
         ocaml-compiler: "4.14.0"
+        disable-sandboxing: true
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bubblewrap pkg-config m4
+    
+    - name: Initialize OPAM
+      run: |
+        opam init --disable-sandboxing -y --bare
+        eval $(opam env)
+        opam switch create 4.14.0
+        eval $(opam env)
     
     - name: Install project dependencies
       run: |
+        eval $(opam env)
+        opam update
         opam install dune alcotest -y
     
     - name: Build Lab1 Task4
       working-directory: ./lab1/task4
-      run: dune build
+      run: |
+        eval $(opam env)
+        dune build
     
-    - name: Test Lab1 Task4 with unlimited stack
+    - name: Test Lab1 Task4
       working-directory: ./lab1/task4
       run: |
-        # Устанавливаем безлимитный стек несколькими способами
+        eval $(opam env)
+        # Убираем все ограничения стека
         ulimit -s unlimited
-        # OCAMLRUNPARAM=0 означает неограниченный стек
-        OCAMLRUNPARAM="l=0" dune runtest
+        # l=0 - неограниченный стек OCaml
+        # s=0 - неограниченный стек для обработчиков сигналов
+        OCAMLRUNPARAM="l=0,s=0" dune runtest
 
   test-lab2-task27:
     name: Test Lab2 Task27
@@ -79,17 +116,35 @@ jobs:
       uses: ocaml/setup-ocaml@v2
       with:
         ocaml-compiler: "4.14.0"
+        disable-sandboxing: true
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bubblewrap pkg-config m4
+    
+    - name: Initialize OPAM
+      run: |
+        opam init --disable-sandboxing -y --bare
+        eval $(opam env)
+        opam switch create 4.14.0
+        eval $(opam env)
     
     - name: Install project dependencies
       run: |
+        eval $(opam env)
+        opam update
         opam install dune alcotest -y
     
     - name: Build Lab2 Task27
       working-directory: ./lab2/task27
-      run: dune build
+      run: |
+        eval $(opam env)
+        dune build
     
-    - name: Test Lab2 Task27 with unlimited stack
+    - name: Test Lab2 Task27
       working-directory: ./lab2/task27
       run: |
+        eval $(opam env)
         ulimit -s unlimited
-        dune runtest
+        OCAMLRUNPARAM="l=0,s=0,v=0" dune runtest
