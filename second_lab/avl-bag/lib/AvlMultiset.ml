@@ -15,6 +15,7 @@ module type AVL_BAG = sig
   val difference: 'a tree -> 'a tree -> 'a tree
   val fold_left: ('acc -> 'a -> int -> 'acc) -> 'acc -> 'a tree -> 'acc
   val fold_right: ('a -> int -> 'acc -> 'acc) -> 'a tree -> 'acc -> 'acc
+  
   val equal: 'a tree -> 'a tree -> bool
   val ( = ): 'a tree -> 'a tree -> bool
 end
