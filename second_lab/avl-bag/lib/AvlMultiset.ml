@@ -6,6 +6,7 @@ module type AVL_BAG = sig
   val total_size: 'a tree -> int
   val unique_size: 'a tree -> int
   val contains: 'a -> 'a tree -> bool
+  
   val insert: 'a -> 'a tree -> 'a tree
   val delete: 'a -> 'a tree -> 'a tree
   val map: ('a -> 'b) -> 'a tree -> 'b tree
