@@ -1,6 +1,5 @@
 module Common = struct
   let max x y = if x > y then x else y
-
   let rec pow10 e =
     if e = 0 then 1
     else 10 * pow10 (e - 1)
