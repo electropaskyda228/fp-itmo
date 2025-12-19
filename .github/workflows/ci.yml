@@ -62,7 +62,6 @@ jobs:
   test-lab1-task4:
     name: Test Lab1 Task4
     runs-on: ubuntu-22.04
-    needs: test-avl-bag
     
     steps:
     - uses: actions/checkout@v3
@@ -110,7 +109,6 @@ jobs:
   test-lab1-task27:
     name: Test Lab1 Task27
     runs-on: ubuntu-22.04
-    needs: test-lab1-task4
     
     steps:
     - uses: actions/checkout@v3
