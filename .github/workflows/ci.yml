@@ -47,11 +47,11 @@ jobs:
         eval $(opam env)
         dune build
     
-    - name: Test AVL Bag
+    - name: Test AVL Bag with increased stack
       working-directory: ./second_lab/avl-bag
       run: |
         eval $(opam env)
-        dune runtest
+        OCAMLRUNPARAM="l=1000000000" dune runtest
 
   test-lab1-task4:
     name: Test Lab1 Task4
@@ -91,11 +91,11 @@ jobs:
         eval $(opam env)
         dune build
     
-    - name: Test Lab1 Task4
+    - name: Test Lab1 Task4 with increased stack
       working-directory: ./lab1/task4
       run: |
         eval $(opam env)
-        dune runtest
+        OCAMLRUNPARAM="l=1000000000" dune runtest
 
   test-lab2-task27:
     name: Test Lab2 Task27
@@ -135,8 +135,10 @@ jobs:
         eval $(opam env)
         dune build
     
-    - name: Test Lab2 Task27
+    - name: Test Lab2 Task27 with increased stack
       working-directory: ./lab2/task27
       run: |
         eval $(opam env)
+        export OCAMLRUNPARAM="l=1000000000"
+        ulimit -s unlimited
         dune runtest
