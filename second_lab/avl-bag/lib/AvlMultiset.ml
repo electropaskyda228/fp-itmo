@@ -11,6 +11,7 @@ module type AVL_BAG = sig
   val delete: 'a -> 'a tree -> 'a tree
   val map: ('a -> 'b) -> 'a tree -> 'b tree
   val filter: ('a -> bool) -> 'a tree -> 'a tree
+  
   val union: 'a tree -> 'a tree -> 'a tree
   val intersection: 'a tree -> 'a tree -> 'a tree
   val difference: 'a tree -> 'a tree -> 'a tree
