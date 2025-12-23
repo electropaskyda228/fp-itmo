@@ -195,6 +195,72 @@ let test_sort_by_x () =
   Alcotest.(check (list (testable Common.pp_pair float_pair_equal)))
     "sort by x" expected sorted
 
+let test_csv_input () =
+  (* Находим и читаем CSV файл *)
+  let csv_path = "test_data/test_point.csv" in
+  
+  if not (Sys.file_exists csv_path) then
+    Alcotest.fail (Printf.sprintf "CSV file not found: %s" csv_path);
+  
+  let ic = open_in csv_path in
+  let csv_content = really_input_string ic (in_channel_length ic) in
+  close_in ic;
+  
+  (* Создаем временный файл с содержимым CSV *)
+  let temp_file = Filename.temp_file "test_csv_" ".csv" in
+  let oc = open_out temp_file in
+  output_string oc csv_content;
+  close_out oc;
+  
+  (* Запускаем программу *)
+  let cmd = Printf.sprintf "../bin/train.exe -step 0.5 --linear < %s" temp_file in
+  let ic = Unix.open_process_in cmd in
+  
+  (* Читаем вывод *)
+  let buf = Buffer.create 1024 in
+  let rec read_output () =
+    try
+      let line = input_line ic in
+      Buffer.add_string buf line;
+      Buffer.add_char buf '\n';
+      read_output ()
+    with End_of_file -> ()
+  in
+  read_output ();
+  
+  ignore (Unix.close_process_in ic);
+  
+  (* Удаляем временный файл *)
+  Sys.remove temp_file;
+  
+  let output = Buffer.contents buf in
+  
+  let expected = 
+    "linear: 1.00 1.00\n\
+    linear: 1.50 1.50\n\
+    linear: 2.00 2.00\n\
+    linear: 2.50 2.50\n\
+    linear: 3.00 3.00\n\
+    linear: 3.50 3.50\n\
+    linear: 4.00 4.00\n\
+    linear: 2.00 2.00\n\
+    linear: 2.50 2.50\n\
+    linear: 3.00 3.00\n\
+    linear: 3.50 3.50\n\
+    linear: 4.00 4.00\n\
+    linear: 4.50 4.50\n\
+    linear: 5.00 5.00\n\
+    linear: 3.00 3.00\n\
+    linear: 3.50 3.50\n\
+    linear: 4.00 4.00\n\
+    linear: 4.50 4.50\n\
+    linear: 5.00 5.00\n\
+    linear: 5.50 5.50\n\
+    linear: 6.00 6.00\n"
+  in
+  
+  Alcotest.(check string) "csv input test" expected output
+
 let interpolation_tests = [
   ("linear_basic", `Quick, test_linear_interpolate_basic);
   ("linear_single", `Quick, test_linear_interpolate_single_point);
@@ -214,5 +280,8 @@ let interpolation_tests = [
 
 let () =
   Alcotest.run "Interpolation Tests" [
-    ("Interpolation", interpolation_tests)
+    ("Interpolation", interpolation_tests);
+    ("CSV Input", [
+      Alcotest.test_case "basic csv" `Quick test_csv_input
+    ])
   ]

@@ -35,22 +35,7 @@ let process_stream n delta linear newton (input_stream : pair Seq.t) =
     else
       Seq.Nil in
   
-  let rec process in_stream () =
-    match in_stream () with
-    | Seq.Nil -> 
-        emit_interpolated ()
-    | Seq.Cons(point,next_stream) ->
-        RingBuffer.push buffer point;
-        match emit_interpolated () with
-        | Seq.Nil -> 
-            process next_stream ()
-        | interpolation_seq ->
-            let rec combine_interpolation interpolation ()  =
-              match interpolation () with
-              | Seq.Nil -> process next_stream ()
-              | Seq.Cons(p, next_interp) -> 
-                  Seq.Cons(p, combine_interpolation next_interp)
-            in
-            combine_interpolation (fun () -> interpolation_seq) ()
-          in
-  process input_stream
+  Seq.flat_map (fun point ->
+    RingBuffer.push buffer point;
+    fun () -> emit_interpolated ()
+  ) input_stream

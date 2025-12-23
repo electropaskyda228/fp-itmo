@@ -1,3 +1,7 @@
 (tests
  (names test)
- (libraries interpol alcotest qcheck qcheck-alcotest))
+ (libraries interpol alcotest qcheck qcheck-alcotest)
+ (deps ../bin/train.exe test_data/test_point.csv))
+
+(copy_files
+ (files test_data/*.csv))
