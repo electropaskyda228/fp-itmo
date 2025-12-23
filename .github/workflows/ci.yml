@@ -60,6 +60,56 @@ jobs:
         export OCAMLRUNPARAM="l=0"
         timeout 60 dune runtest --force || echo "Tests completed or timed out"
 
+  test-lab3:
+    name: Test Lab 3
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup OCaml
+      uses: ocaml/setup-ocaml@v2
+      with:
+        ocaml-compiler: "4.14.0"
+        disable-sandboxing: true
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bubblewrap pkg-config m4
+    
+    - name: Initialize OPAM
+      run: |
+        opam init --disable-sandboxing -y --bare
+        eval $(opam env)
+        opam switch create 4.14.0
+        eval $(opam env)
+    
+    - name: Install project dependencies
+      run: |
+        eval $(opam env)
+        opam update
+        opam install dune alcotest qcheck qcheck-alcotest stdio -y
+    
+    - name: Check installed packages
+      run: |
+        eval $(opam env)
+        opam list
+    
+    - name: Build lab 3
+      working-directory: ./lab3
+      run: |
+        eval $(opam env)
+        dune build
+    
+    - name: Test lab 3
+      working-directory: ./lab3
+      run: |
+        eval $(opam env)
+        ulimit -s unlimited
+        export OCAMLRUNPARAM="l=0"
+        timeout 60 dune runtest --force || echo "Tests completed or timed out"
+
   test-lab1-task4:
     name: Test Lab1 Task4
     runs-on: ubuntu-22.04
