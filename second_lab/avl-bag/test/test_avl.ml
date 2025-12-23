@@ -13,7 +13,6 @@ let make_test_tree =
   AM.insert 3 |>
   AM.insert 2 |> AM.insert 2 |> AM.insert 2 |> AM.insert 2 |>
   AM.insert 1
-
 let avl_arb_simple =
   QCheck.(Gen.(list small_int |> map (fun lst ->
     List.fold_left (fun t x -> AM.insert x t) AM.empty lst))
