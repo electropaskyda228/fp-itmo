@@ -103,6 +103,10 @@ module AvlMultiset: AVL_BAG = struct
         else 
           Node(h, v_curr, count + 1, l, r)
 
+  let rec insert_many t x cnt =
+    if cnt = 0 then t
+    else insert_many (insert x t) x (cnt - 1)
+
   (* delete *)
   let rec min_value = function
     | Leaf -> None
@@ -165,10 +169,6 @@ module AvlMultiset: AVL_BAG = struct
     | Leaf, t | t, Leaf -> t
     | Node(_, v, count, l, r), _ ->
         let dest_with_v = 
-          let rec insert_many t x cnt =
-            if cnt = 0 then t
-            else insert_many (insert x t) x (cnt - 1)
-          in
           insert_many t2 v count
         in
         let with_left = merge_avl l dest_with_v in
@@ -180,10 +180,6 @@ module AvlMultiset: AVL_BAG = struct
         let left_filtered = filter p l in
         let right_filtered = filter p r in
         if p v then
-          let rec insert_many t x cnt =
-            if cnt = 0 then t
-            else insert_many (insert x t) x (cnt - 1)
-          in
           insert_many (merge_avl left_filtered right_filtered) v count
         else
           merge_avl left_filtered right_filtered
@@ -201,10 +197,6 @@ module AvlMultiset: AVL_BAG = struct
           if new_cnt > 0 then
             let left_inter = aux l1 t2 in
             let right_inter = aux r1 t2 in
-            let rec insert_many t x cnt =
-              if cnt = 0 then t
-              else insert_many (insert x t) x (cnt - 1)
-            in
             insert_many (merge_avl left_inter right_inter) v1 new_cnt
           else
             merge_avl (aux l1 t2) (aux r1 t2)
@@ -222,10 +214,6 @@ module AvlMultiset: AVL_BAG = struct
           let left_diff = aux l1 t2 in
           let right_diff = aux r1 t2 in
           if new_cnt > 0 then
-            let rec insert_many t x cnt =
-              if cnt = 0 then t
-              else insert_many (insert x t) x (cnt - 1)
-            in
             insert_many (merge_avl left_diff right_diff) v1 new_cnt
           else
             merge_avl left_diff right_diff

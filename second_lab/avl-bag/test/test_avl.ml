@@ -90,6 +90,12 @@ let test_commute () =
   Alcotest.(check bool) "associativity of union" true (left_assoc = right_assoc)
 
 (* Property-based *)
+let prop_monoid =
+  QCheck.Test.make ~count:1000 ~name:"monoid"
+    avl_arb_simple
+    (fun a ->
+      (AM.equal a (AM.union a AM.empty)) && (AM.equal a (AM.union AM.empty a))
+      )
 let prop_union_assoc =
   QCheck.Test.make ~count:1000 ~name:"union associative"
     QCheck.(triple avl_arb_simple avl_arb_simple avl_arb_simple)
@@ -144,6 +150,105 @@ let prop_delete_decreases =
       let old_count = AM.count x t in
       old_count = 0 || AM.count x new_t = old_count - 1)
 
+(* Производительность insert *)
+let test_insert_perf () =
+  let rec build_tree n acc =
+    if n <= 0 then acc
+    else build_tree (n - 1) (AM.insert (Random.int 1000000) acc)
+  in
+  
+  let sizes = [1000; 10000; 50000] in
+  
+  let rec test_sizes = function
+    | [] -> true
+    | size :: rest ->
+        let start = Unix.gettimeofday () in
+        let _ = build_tree size AM.empty in
+        let elapsed = Unix.gettimeofday () -. start in
+        let time_per_op = elapsed /. float_of_int size in
+        
+        let passed = time_per_op < 0.00001 in
+        
+        Printf.printf "insert size %d: %.6f сек/оп\n" size time_per_op;
+        if passed then test_sizes rest else false
+  in
+  
+  Alcotest.(check bool) "insert fast" true (test_sizes sizes)
+
+(* Производительность count *)
+let test_count_perf () =
+  let rec build_tree n acc =
+    if n <= 0 then acc
+    else build_tree (n - 1) (AM.insert n acc)
+  in
+  
+  let sizes = [1000; 10000; 50000] in
+  
+  let rec test_sizes = function
+    | [] -> true
+    | size :: rest ->
+        let tree = build_tree size AM.empty in
+        let iterations = 1000 in
+        
+        let total_time = ref 0.0 in
+        let rec do_counts n =
+          if n <= 0 then ()
+          else begin
+            let x = Random.int (size * 2) in
+            let start = Unix.gettimeofday () in
+            ignore (AM.count x tree);
+            total_time := !total_time +. (Unix.gettimeofday () -. start);
+            do_counts (n - 1)
+          end
+        in
+        
+        do_counts iterations;
+        let time_per_op = !total_time /. float_of_int iterations in
+        let passed = time_per_op < 0.000005 in
+        
+        Printf.printf "count size %d: %.9f сек/оп\n" size time_per_op;
+        if passed then test_sizes rest else false
+  in
+  
+  Alcotest.(check bool) "count fast" true (test_sizes sizes)
+
+(* Производительность delete *)
+let test_delete_perf () =
+  let sizes = [1000; 10000; 50000] in
+  
+  let rec test_sizes = function
+    | [] -> true
+    | size :: rest ->
+        let rec build_tree n acc =
+          if n <= 0 then acc
+          else build_tree (n - 1) (AM.insert (n * 2) acc)
+        in
+        
+        let tree = build_tree size AM.empty in
+        let iterations = min 1000 size in
+        
+        let total_time = ref 0.0 in
+        let rec do_deletes n tree_acc =
+          if n <= 0 then tree_acc
+          else begin
+            let x = (Random.int size) * 2 in
+            let start = Unix.gettimeofday () in
+            let new_tree = AM.delete x tree_acc in
+            total_time := !total_time +. (Unix.gettimeofday () -. start);
+            do_deletes (n - 1) new_tree
+          end
+        in
+        
+        let _ = do_deletes iterations tree in
+        let time_per_op = !total_time /. float_of_int iterations in
+        let passed = time_per_op < 0.00001 in
+        
+        Printf.printf "delete size %d: %.9f сек/оп\n" size time_per_op;
+        if passed then test_sizes rest else false
+  in
+  
+  Alcotest.(check bool) "delete fast" true (test_sizes sizes)
+
 let () =
   Alcotest.run "AVL Tests" [
     ("Basic", [
@@ -161,10 +266,16 @@ let () =
       test_case "commute" `Quick test_commute;
     ]);
     ("Property_based", [
+      QCheck_alcotest.to_alcotest prop_monoid;
       QCheck_alcotest.to_alcotest prop_union_assoc;
       QCheck_alcotest.to_alcotest prop_intersection_min;
       QCheck_alcotest.to_alcotest prop_difference_sub;
       QCheck_alcotest.to_alcotest prop_insert_count;
       QCheck_alcotest.to_alcotest prop_delete_decreases;
+    ]);
+    ("Performance", [
+      test_case "insert O(log n)" `Slow test_insert_perf;
+      test_case "count O(log n)" `Slow test_count_perf;
+      test_case "delete O(log n)" `Slow test_delete_perf;
     ])
   ]
