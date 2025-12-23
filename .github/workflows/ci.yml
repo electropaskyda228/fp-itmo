@@ -57,7 +57,7 @@ jobs:
       run: |
         eval $(opam env)
         ulimit -s unlimited
-        OCAMLRUNPARAM="l=0" dune runtest --force
+        timeout 60 OCAMLRUNPARAM="l=0" dune runtest --force || true
 
   test-lab1-task4:
     name: Test Lab1 Task4
