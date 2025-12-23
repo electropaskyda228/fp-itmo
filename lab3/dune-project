@@ -1,0 +1,7 @@
+(lang dune 3.8)
+
+(name interpol)
+
+(package
+ (name interpol)
+ (depends alcotest stdio))
