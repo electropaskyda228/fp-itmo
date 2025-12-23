@@ -44,66 +44,51 @@ let linear_interpolate points delta =
 (* Интерполяция Ньютона *)
 let newton_interpolate points delta =
   let sorted_points = sort_by_x points in
+  let n = List.length sorted_points in
   
-  let rec divided_difference = function
-    | [] -> failwith "Empty indices"
-    | [i] -> 
-        let Pair(_, y) = List.nth sorted_points i in
-        y
-    | i :: j :: rest ->
-        let Pair(xi, _) = List.nth sorted_points i in
-        let Pair(xj, _) = List.nth sorted_points j in
-        let diff1 = divided_difference (i :: rest) in
-        let diff2 = divided_difference (j :: rest) in
-        (diff1 -. diff2) /. (xj -. xi)
-  in
-  let rec compute_differences order idx acc =
-    if idx + order >= List.length sorted_points then List.rev acc
-    else
-      let diff = divided_difference (List.init (order + 1) ((+) idx)) in
-      compute_differences order (idx + 1) (diff :: acc)
-  in
-  
-  let rec all_differences order acc =
-    if order >= List.length sorted_points then List.rev acc
-    else
-      let diffs = compute_differences order 0 [] in
-      all_differences (order + 1) (diffs :: acc)
-  in
-  
-  let differences_list = all_differences 1 [] in
-  
-  let Pair(min_x, _) = List.hd sorted_points in
-  let Pair(max_x, _) = List.rev sorted_points |> List.hd in
-  
-  let rec newton_poly_value x idx acc product =
-    if idx >= List.length sorted_points then acc
-    else
-      let diff = 
-        if idx = 0 then
-          let Pair(_, y0) = List.hd sorted_points in
-          y0
+  if n < 2 then []
+  else
+    let xs = List.map (fun (Pair(x, _)) -> x) sorted_points in
+    let ys = List.map (fun (Pair(_, y)) -> y) sorted_points in
+    
+    let rec compute_divided_differences i j =
+      if j = 0 then List.nth ys i
+      else
+        let diff1 = compute_divided_differences i (j - 1) in
+        let diff2 = compute_divided_differences (i + 1) (j - 1) in
+        let xi = List.nth xs i in
+        let xi_j = List.nth xs (i + j) in
+        (diff2 -. diff1) /. (xi_j -. xi)
+    in
+    
+    let coefficients = 
+      List.init n (fun i -> compute_divided_differences 0 i)
+    in
+    
+    let evaluate x =
+      let rec loop i acc product =
+        if i >= n then acc
         else
-          List.nth (List.nth differences_list (idx - 1)) 0
+          let coeff = List.nth coefficients i in
+          let new_acc = acc +. coeff *. product in
+          if i = n - 1 then new_acc
+          else
+            let xi = List.nth xs i in
+            let new_product = product *. (x -. xi) in
+            loop (i + 1) new_acc new_product
       in
-      
-      let new_product = 
-        if idx = 0 then 1.0
-        else 
-          let Pair(x_prev, _) = List.nth sorted_points (idx - 1) in
-          product *. (x -. x_prev)
-      in
-      
-      newton_poly_value x (idx + 1) (acc +. diff *. new_product) new_product
-  in
-  
-  let step = delta in
-  
-  let rec generate_points current_x acc =
-    if current_x > max_x +. step /. 2.0 then List.rev acc
-    else
-      let y = newton_poly_value current_x 0 0.0 1.0 in
-      generate_points (current_x +. step) (Pair(current_x, y) :: acc)
-  in
-  
-  generate_points min_x []
+      loop 0 0.0 1.0
+    in
+    
+    let Pair(min_x, _) = List.hd sorted_points in
+    let Pair(max_x, _) = List.rev sorted_points |> List.hd in
+    let step = delta in
+    
+    let rec generate current_x acc =
+      if current_x > max_x +. step /. 2.0 then List.rev acc
+      else
+        let y = evaluate current_x in
+        generate (current_x +. step) (Pair(current_x, y) :: acc)
+    in
+    
+    generate min_x []

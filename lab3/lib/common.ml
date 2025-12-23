@@ -1,6 +1,9 @@
 type pair = Pair of float * float
 type interpolated = Interpolated of string * pair
 
+let pp_pair fmt (Pair(x, y)) =
+  Format.fprintf fmt "(%.3f, %.3f)" x y
+
 module RingBuffer = struct
   type t = {
     data : pair array;
