@@ -136,14 +136,14 @@ let prop_difference_sub =
 
 let prop_insert_count =
   QCheck.Test.make ~count:1000 ~name:"insert increases count by 1"
-    (QCheck.pair QCheck.small_nat avl_arb_simple)
+    (QCheck.pair QCheck.nat_small avl_arb_simple)
     (fun (x, t) -> 
       let new_t = AM.insert x t in
       AM.count x new_t = AM.count x t + 1)
 
 let prop_delete_decreases =
   QCheck.Test.make ~count:1000 ~name:"delete decreases count by 1 or removes"
-    (QCheck.pair QCheck.small_nat avl_arb_simple)
+    (QCheck.pair QCheck.nat_small avl_arb_simple)
     (fun (x, t) -> 
       let new_t = AM.delete x t in
       let old_count = AM.count x t in
