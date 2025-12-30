@@ -7,6 +7,7 @@ on:
       - 'second_lab/avl-bag/**'
       - 'lab1/task4/**'
       - 'lab1/task27/**'
+      - 'lab3/**'
   workflow_dispatch:
 
 jobs:
@@ -39,12 +40,25 @@ jobs:
       run: |
         eval $(opam env)
         opam update
-        opam install dune alcotest qcheck qcheck-alcotest -y
+        opam install dune alcotest qcheck qcheck-alcotest ocamlformat -y
     
     - name: Check installed packages
       run: |
         eval $(opam env)
         opam list
+    
+    - name: Autoformat AVL Bag
+      working-directory: ./second_lab/avl-bag
+      run: |
+        eval $(opam env)
+        # Автоформатирование
+        dune build @fmt --auto-promote 2>/dev/null || true
+        if ! dune build @fmt 2>/dev/null; then
+          echo "Форматирование некорректно! Файлы требуют исправления:"
+          dune build @fmt 2>&1 | grep -E "\.ml[i]?$" || true
+          exit 1
+        fi
+        echo "Форматирование корректно"
     
     - name: Build AVL Bag
       working-directory: ./second_lab/avl-bag
@@ -89,12 +103,25 @@ jobs:
       run: |
         eval $(opam env)
         opam update
-        opam install dune alcotest qcheck qcheck-alcotest stdio -y
+        opam install dune alcotest qcheck qcheck-alcotest stdio ocamlformat -y
     
     - name: Check installed packages
       run: |
         eval $(opam env)
         opam list
+    
+    - name: Autoformat lab 3
+      working-directory: ./lab3
+      run: |
+        eval $(opam env)
+        # Автоформатирование
+        dune build @fmt --auto-promote 2>/dev/null || true
+        if ! dune build @fmt 2>/dev/null; then
+          echo "Форматирование некорректно! Файлы требуют исправления:"
+          dune build @fmt 2>&1 | grep -E "\.ml[i]?$" || true
+          exit 1
+        fi
+        echo "Форматирование корректно"
     
     - name: Build lab 3
       working-directory: ./lab3
@@ -139,7 +166,20 @@ jobs:
       run: |
         eval $(opam env)
         opam update
-        opam install dune alcotest -y
+        opam install dune alcotest ocamlformat -y
+    
+    - name: Autoformat Lab1 Task4
+      working-directory: ./lab1/task4
+      run: |
+        eval $(opam env)
+        # Автоформатирование
+        dune build @fmt --auto-promote 2>/dev/null || true
+        if ! dune build @fmt 2>/dev/null; then
+          echo "Форматирование некорректно! Файлы требуют исправления:"
+          dune build @fmt 2>&1 | grep -E "\.ml[i]?$" || true
+          exit 1
+        fi
+        echo "Форматирование корректно"
     
     - name: Build Lab1 Task4
       working-directory: ./lab1/task4
@@ -186,7 +226,20 @@ jobs:
       run: |
         eval $(opam env)
         opam update
-        opam install dune alcotest -y
+        opam install dune alcotest ocamlformat -y
+    
+    - name: Autoformat Lab1 Task27
+      working-directory: ./lab1/task27
+      run: |
+        eval $(opam env)
+        # Автоформатирование
+        dune build @fmt --auto-promote 2>/dev/null || true
+        if ! dune build @fmt 2>/dev/null; then
+          echo "Форматирование некорректно! Файлы требуют исправления:"
+          dune build @fmt 2>&1 | grep -E "\.ml[i]?$" || true
+          exit 1
+        fi
+        echo "Форматирование корректно"
     
     - name: Build Lab1 Task27
       working-directory: ./lab1/task27
