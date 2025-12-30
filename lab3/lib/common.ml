@@ -11,7 +11,6 @@ module RingBuffer = struct
     mutable size : int;
     capacity : int;
   }
-
   let create capacity = {
     data = Array.make capacity (Pair(0., 0.));
     start = 0;
